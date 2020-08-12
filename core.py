@@ -45,6 +45,7 @@ class Device(object):
             # ----------------------------------------
             ret_flag, status_code = HKSDK.logout(self._user_id)
             if ret_flag:
+                self._user_id = -1
                 return True, 0
             # ----------------------------------------
             return False, status_code
@@ -66,8 +67,25 @@ class Device(object):
 
     def close(self):
         with self._lock:
-            if
+            if self._handle_id < 0:
+                return True, 0
+            # ----------------------------------------
+            ret_flag, status_code = HKSDK.close(self._handle_id)
+            if ret_flag:
+                self._handle_id = -1
+                return True, 0
+            # ----------------------------------------
+            return False, status_code
 
+    def read(self):
+        if self._handle_id < 0:
+            return False, None
+        # ----------------------------------------
+        ret_flag, frame = HKSDK.get_frame()
+        if ret_flag:
+            return True, frame
+        # ----------------------------------------
+        return False, None
 
     @classmethod
     def from_uri(cls, uri):
