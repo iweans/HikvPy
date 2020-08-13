@@ -7,8 +7,10 @@ import HKSDK
 
 class Device(object):
 
-    def __init__(self, host: str, port: int = 8000,
-                       user: str =None, passwd: str = None):
+    def __init__(self, camera_id: str,
+                 host: str, port: int = 8000,
+                 user: str = None, passwd: str = None):
+        self._id = camera_id
         self._hostname = host
         self._port = port
         self._username = user
@@ -30,7 +32,7 @@ class Device(object):
             user_id, status_code = HKSDK.login(
                 self._hostname, self._username, self._password)
             if user_id >= 0:
-                self._user_id = self._user_id
+                self._user_id = user_id
                 return True, 0
             # ----------------------------------------
             return False, status_code
@@ -58,7 +60,7 @@ class Device(object):
             if self._handle_id >= 0:
                 return True, 0
             # ----------------------------------------
-            handle_id, status_code = HKSDK.login()
+            handle_id, status_code = HKSDK.open(self._user_id)
             if handle_id >= 0:
                 self._handle_id = handle_id
                 return True, 0
@@ -81,7 +83,7 @@ class Device(object):
         if self._handle_id < 0:
             return False, None
         # ----------------------------------------
-        ret_flag, frame = HKSDK.get_frame()
+        ret_flag, frame = HKSDK.get_frame(self._handle_id)
         if ret_flag:
             return True, frame
         # ----------------------------------------
@@ -94,4 +96,8 @@ class Device(object):
     @property
     def host(self):
         return self._hostname
+
+    @property
+    def id(self):
+        return self._id
 
